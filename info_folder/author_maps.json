@@ -1,9 +1,12 @@
 [
   {
-    "author_key": "l:logan-lorie"
+    "author_key": "l:logan-lorie",
+    "influence": ["Fed Funds Rate", "Balance Sheet"]
   },
   {
-    "author_key": "p:powell-jerome-h"
+    "author_key": "p:powell-jerome-h",
+    "influence": ["Fed Funds Rate", "Balance Sheet", "Financial Stability", "Real Activity",
+                  "Inflation", "Labor Market"]
   },
   {
     "author_key": "w:williams-john-c"
