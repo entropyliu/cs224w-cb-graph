@@ -99,17 +99,6 @@
     }
   },
   {
-    "id": "feddsp:102063",
-    "gpt-5": {
-      "Fed Funds Rate": 0.6,
-      "Labor Market": 0.1,
-      "Inflation": 0.85,
-      "Real Activity": 0.5,
-      "Financial Stability": 0.3,
-      "Balance Sheet": -0.6
-    }
-  },
-  {
     "id": "feddsp:99652",
     "gpt-5": {
       "Fed Funds Rate": 0.0,
@@ -546,17 +535,6 @@
       "Inflation": 0.0,
       "Real Activity": 0.0,
       "Financial Stability": -0.4,
-      "Balance Sheet": 0.0
-    }
-  },
-  {
-    "id": "feddsp:102062",
-    "gpt-5": {
-      "Fed Funds Rate": 0.0,
-      "Labor Market": 0.0,
-      "Inflation": 0.0,
-      "Real Activity": 0.0,
-      "Financial Stability": -0.3,
       "Balance Sheet": 0.0
     }
   }
