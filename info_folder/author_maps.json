@@ -9,10 +9,43 @@
                   "Inflation", "Labor Market"]
   },
   {
-    "author_key": "w:williams-john-c"
+    "author_key": "k:kugler-adriana"
+  },
+  {
+    "author_key": "m:musalem-alberto-g"
+  },
+  {
+    "author_key": "e:evans-charles-l"
   },
   {
     "author_key": "w:waller-christopher-j"
+  },
+  {
+    "author_key": "r:rosengren-eric-s"
+  },
+  {
+    "author_key": "g:george-esther-l"
+  },
+    {
+    "author_key": "b:bullard-james-b"
+  },
+  {
+    "author_key": "y:yellen-janet-l"
+  },
+  {
+    "author_key": "s:schmid-jeffrey"
+  },
+  {
+    "author_key": "w:williams-john-c"
+  },
+  {
+    "author_key": "b:brainard-lael"
+  },
+  {
+    "author_key": "m:mester-loretta-j"
+  },
+  {
+    "author_key": "d:daly-mary-c"
   },
   {
     "author_key": "b:barr-michael-s"
@@ -21,45 +54,33 @@
     "author_key": "b:bowman-michelle-w"
   },
   {
-    "author_key": "c:collins-susan-m"
-  },
-  {
-    "author_key": "m:miran-stephen-i"
-  },
-  {
-    "author_key": "j:jefferson-philip-n"
-  },
-  {
-    "author_key": "m:musalem-alberto-g"
-  },
-  {
-    "author_key": "b:bostic-raphael-w"
-  },
-  {
-    "author_key": "p:paulson-anna-l"
-  },
-  {
-    "author_key": "c:collins-susan-m"
-  },
-  {
-    "author_key": "b:brainard-lael"
+    "author_key": "k:kashkari-neel"
   },
   {
     "author_key": "h:harker-patrick-t"
   },
   {
-    "author_key": "d:daly-mary-c"
-  },
-  {
-    "author_key": "m:mester-loretta-j"
+    "author_key": "j:jefferson-philip-n"
   },
   {
     "author_key": "q:quarles-randal-k"
   },
   {
-    "author_key":  "e:evans-charles-l"
+    "author_key": "b:bostic-raphael-w"
   },
   {
     "author_key": "c:clarida-richard-h"
+  },
+  {
+    "author_key": "k:kaplan-robert-s"
+  },
+  {
+    "author_key": "m:miran-stephen-i"
+  },
+  {
+    "author_key": "c:collins-susan-m"
+  },
+  {
+    "author_key": "d:dudley-william"
   }
 ]
