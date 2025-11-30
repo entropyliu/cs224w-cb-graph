@@ -68,13 +68,11 @@ def extract_chicagofed_html(url):
             except:
                 iso_date = ""
 
-    # -------- Extract TITLE ----------
     title = ""
     title_div = soup.select_one("div.cfedDetail__title h1")
     if title_div:
         title = title_div.get_text(" ", strip=True)
 
-    # -------- Extract TEXT ----------
     paragraphs = []
 
     for body in soup.select("div.cfedContent__body"):
@@ -97,6 +95,49 @@ def extract_chicagofed_html(url):
         "length": len(full_text)
     }
 
+
+def extract_stlouisfed_html(url):
+    resp = requests.get(url)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    # ---------- TITLE ----------
+    title = ""
+    h1 = soup.select_one("div.component.content h1")
+    if h1:
+        title = h1.get_text(" ", strip=True)
+
+    # ---------- DATE ----------
+    raw_date = ""
+    iso_date = ""
+
+    # Typically the first <p> after title block is the date
+    date_tag = soup.select_one("div.component.content p")
+    if date_tag:
+        raw_date = date_tag.get_text(" ", strip=True)
+        try:
+            iso_date = parser.parse(raw_date).date().isoformat()
+        except:
+            iso_date = ""
+
+    # ---------- MAIN TEXT ----------
+    paragraphs = []
+
+    body = soup.select_one("div.field-content div.wrapper")
+    if body:
+        for tag in body.find_all(["p", "h2", "h3"]):
+            t = tag.get_text(" ", strip=True)
+            if t:
+                paragraphs.append(t)
+
+    full_text = "\n\n".join(paragraphs)
+
+    return {
+        "title": title,
+        "date": iso_date,
+        "text": full_text,
+        "length": len(full_text),
+    }
 
 def retrieve_remaining_ids(author_name, data):
 
@@ -165,6 +206,10 @@ def retrieve_remaining_ids(author_name, data):
             continue
         if "fedaer" in record["id"]:
             continue
+        if "fedgpr" in record["id"]:
+            continue
+        if "fedfel" in record["id"]:
+            continue
 
         for file in record["file"]:
 
@@ -206,15 +251,25 @@ def retrieve_remaining_ids(author_name, data):
                     url_links["chicagofed"] = {}
                 url_links['chicagofed'][record["id"]] = url
 
-            if "www.cleverlandfed.org" in url:
-                if "cleverlandfed" not in url_links:
-                    url_links["cleverlandfed"] = {}
-                url_links['cleverlandfed'][record["id"]] = url
+            if "www.clevelandfed.org" in url:
+                if "clevelandfed" not in url_links:
+                    url_links["clevelandfed"] = {}
+                url_links['clevelandfed'][record["id"]] = url
 
             if "www.philadelphiafed.org" in url:
                 if "philadelphiafed" not in url_links:
                     url_links["philadelphiafed"] = {}
                 url_links['philadelphiafed'][record["id"]] = url
+
+            if "www.stlouisfed.org" in url:
+                if "stlouisfed" not in url_links:
+                    url_links["stlouisfed"] = {}
+                url_links['stlouisfed'][record["id"]] = url
+
+            if "www.bostonfed.org" in url:
+                if "bostonfed" not in url_links:
+                    url_links["bostonfed"] = {}
+                url_links['bostonfed'][record["id"]] = url
 
             idx += 1
 
@@ -388,6 +443,55 @@ def parse_nyfed_html(url):
         "length": len(full_text)
     }
 
+
+def extract_bostonfed_html(url):
+
+    resp = requests.get(url)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    # ---------- TITLE ----------
+    title = ""
+    t = soup.select_one("div.title-container h1")
+    if t:
+        title = t.get_text(" ", strip=True)
+
+    # ---------- AUTHOR ----------
+    author = ""
+    a = soup.select_one("div.author-container")
+    if a:
+        author = a.get_text(" ", strip=True).replace("By ", "").strip()
+
+    # ---------- DATE ----------
+    raw_date = ""
+    iso_date = ""
+
+    d = soup.select_one("div.date-container")
+    if d:
+        raw_date = d.get_text(" ", strip=True)
+        try:
+            iso_date = parser.parse(raw_date).date().isoformat()
+        except:
+            iso_date = ""
+
+    # ---------- SPEECH TEXT ----------
+    paragraphs = []
+
+    for p in soup.select("div.bodytextlist p"):
+        txt = p.get_text(" ", strip=True)
+        if txt:
+            paragraphs.append(txt)
+
+    full_text = "\n\n".join(paragraphs)
+
+    return {
+        "title": title,
+        "author": author,
+        "date": iso_date,
+        "text": full_text,
+        "length": len(full_text)
+    }
+
 def html_speeches_to_json(url_dict, url_type, output_json="speeches.json"):
 
     # --- Load existing JSON ---
@@ -421,10 +525,14 @@ def html_speeches_to_json(url_dict, url_type, output_json="speeches.json"):
             parsed = extract_dallasfed_html(url)
         elif url_type == "chicagofed":
             parsed = extract_chicagofed_html(url)
-        elif url_type == "cleverlandfed":
+        elif url_type == "clevelandfed":
             parsed = extract_clevelandfed_html(url)
         elif url_type == "philadelphiafed":
             parsed = extract_philadelphiafed_html(url)
+        elif url_type == "stlouisfed":
+            parsed = extract_stlouisfed_html(url)
+        elif url_type == "bostonfed":
+            parsed = extract_bostonfed_html(url)
         else:
             raise ValueError("Unknown url type")
 
