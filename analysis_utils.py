@@ -1,0 +1,121 @@
+import json
+import glob
+from pathlib import Path
+from datetime import datetime, date
+import functools
+import pandas as pd
+
+DATA_DIR = Path("data")
+SPEECH_FOLDER = DATA_DIR / "text_data/"
+TOPIC_SCORE_FOLDER = DATA_DIR / "topic_scores/"
+RATES_FILE = DATA_DIR / "price_data/2025-10-26 Fed Funds 12M 6M Historical Swap Rates.xlsx"
+START_DATE = datetime(2018, 6, 1)
+
+def load_topic_scores_by_sid(path=TOPIC_SCORE_FOLDER):
+
+    json_files = glob.glob(str(path) + "/*.json")
+    scores = {}
+    speeches = load_speeches()
+
+    for json_file in json_files:
+        with open(json_file, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+
+        for row in raw:
+            sid = row["id"]
+            if sid not in speeches:
+                continue
+            scores[sid] = row["gpt-5"]
+
+    return scores
+
+def load_topic_scores_by_date(path=TOPIC_SCORE_FOLDER, apply_average=True):
+
+    json_files = glob.glob(str(path) + "/*.json")
+    scores = {}
+    speeches = load_speeches()
+
+    for json_file in json_files:
+        with open(json_file, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+
+        for row in raw:
+            sid = row["id"]
+            if sid not in speeches:
+                continue
+            date = speeches[sid]["date"]
+            if date not in scores:
+                scores[date] = []
+
+            scores[date] += [row["gpt-5"]]
+
+    if apply_average:
+        final_scores = {}
+        for date, values in scores.items():
+            score_dict = {}
+            for value in values:
+                for topic in value:
+                    if topic not in score_dict:
+                        score_dict[topic] = 0
+                    score_dict[topic] += value[topic]/len(values)
+            final_scores[date] = score_dict
+    else:
+        final_scores = {}
+        for date in scores:
+            final_scores[date] = scores[date][-1]
+
+    return final_scores
+
+def parse_date(dstr: str) -> date:
+    """
+    Try several common date formats and return a datetime.date.
+    Adjust/add formats if your data differs.
+    """
+    dstr = dstr.strip()
+    formats = [
+        "%Y-%m-%d",       # 2023-08-25
+        "%Y/%m/%d",       # 2023/08/25
+        "%Y-%m-%dT%H:%M:%S",  # 2023-08-25T00:00:00
+        "%B %d, %Y",      # August 25, 2023
+        "%b %d, %Y",      # Aug 25, 2023
+    ]
+    for fmt in formats:
+        try:
+            return datetime.strptime(dstr, fmt)
+        except ValueError:
+            continue
+    raise ValueError(f"Unrecognized date format: {dstr}")
+
+
+@functools.lru_cache(maxsize=None)
+def load_speeches(path=SPEECH_FOLDER):
+    json_files = glob.glob(str(path) + "/*.json")
+
+    speeches = {}
+
+    for json_file in json_files:
+        with open(json_file, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+
+        for row in raw:
+
+            sid = row["id"]
+            date = parse_date(row["date"])
+            if date < START_DATE:
+                continue
+
+            speeches[sid] = {
+                "author": json_file.split("/")[-1].split(".")[0],
+                "text": row["text"],
+                "date": parse_date(row["date"]),
+            }
+    return speeches
+
+def load_rates(path=RATES_FILE):
+    df = pd.read_excel(path)
+    df["Date"] = df["Date"].apply(lambda x: str(x).split(" ")[0])
+    df["Date"] = df["Date"].apply(parse_date)
+    df = df.set_index("Date").sort_index()
+    df = df[["Rate"]]
+    df.index = pd.to_datetime(df.index)
+    return df
