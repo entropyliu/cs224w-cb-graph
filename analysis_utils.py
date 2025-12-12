@@ -13,6 +13,7 @@ RATES_FILE = DATA_DIR / "price_data/2025-10-26 Fed Funds 12M 6M Historical Swap 
 EMBEDDING_FILE = DATA_DIR / "speeches_with_embeddings.json"
 
 START_DATE = datetime(2018, 6, 1)
+FORWARD_DAYS = 5
 
 def load_topic_scores_by_sid(path=TOPIC_SCORE_FOLDER):
 
@@ -131,7 +132,7 @@ def load_rates(path=RATES_FILE):
     df = df.set_index("Date").sort_index()
     df = df[["Rate"]]
     df.index = pd.to_datetime(df.index)
-    df["Rate_Change"] = df["Rate"].diff()
+    df["Rate_Change"] = df["Rate"].diff(FORWARD_DAYS)
 
     speech_by_dates = group_speeches_by_date(load_speeches())
     dates = pd.to_datetime(list(speech_by_dates.keys()))
@@ -146,4 +147,40 @@ def group_speeches_by_date(speeches):
     for sid, info in speeches.items():
         d = info["date"]
         speeches_by_date[d].append(sid)
+    speeches_by_date = dict(sorted(speeches_by_date.items(), key=lambda x: x[0]))
     return speeches_by_date
+
+# Build global_idx the same way you did before building graphs
+def build_global_indices(speeches, topic_scores, rates_df):
+    # 1) Authors
+    author_names = sorted({v["author"] for v in speeches.values()})
+    author2idx = {name: i for i, name in enumerate(author_names)}
+
+    # 2) Topics
+    topic_names = set()
+    for sid, topics in topic_scores.items():
+        for tname in topics.keys():
+            topic_names.add(tname)
+    topic_names = sorted(topic_names)
+    topic2idx = {name: i for i, name in enumerate(topic_names)}
+
+    # 3) Speech ids
+    speech_ids = sorted(speeches.keys())
+    speech2idx = {sid: i for i, sid in enumerate(speech_ids)}
+
+    # 4) Dates
+    all_dates = sorted(set(rates_df.index))  # dates where we have rates
+    date2idx = {d: i for i, d in enumerate(all_dates)}
+
+    return {
+        "author2idx": author2idx,
+        "topic2idx": topic2idx,
+        "speech2idx": speech2idx,
+        "date2idx": date2idx,
+        "dates": all_dates,
+    }
+
+# speech_dates = group_speeches_by_date(load_speeches())
+# speech_dates = list(speech_dates.keys())
+# print(min(speech_dates), max(speech_dates)
+#       )
