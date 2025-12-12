@@ -13,6 +13,7 @@ RATES_FILE = DATA_DIR / "price_data/2025-10-26 Fed Funds 12M 6M Historical Swap 
 EMBEDDING_FILE = DATA_DIR / "speeches_with_embeddings.json"
 
 START_DATE = datetime(2018, 6, 1)
+FORWARD_DAYS = 5
 
 def load_topic_scores_by_sid(path=TOPIC_SCORE_FOLDER):
 
@@ -131,7 +132,7 @@ def load_rates(path=RATES_FILE):
     df = df.set_index("Date").sort_index()
     df = df[["Rate"]]
     df.index = pd.to_datetime(df.index)
-    df["Rate_Change"] = df["Rate"].diff()
+    df["Rate_Change"] = df["Rate"].diff(FORWARD_DAYS)
 
     speech_by_dates = group_speeches_by_date(load_speeches())
     dates = pd.to_datetime(list(speech_by_dates.keys()))
@@ -179,7 +180,7 @@ def build_global_indices(speeches, topic_scores, rates_df):
         "dates": all_dates,
     }
 
-speech_dates = group_speeches_by_date(load_speeches())
-speech_dates = list(speech_dates.keys())
-print(min(speech_dates), max(speech_dates)
-      )
+# speech_dates = group_speeches_by_date(load_speeches())
+# speech_dates = list(speech_dates.keys())
+# print(min(speech_dates), max(speech_dates)
+#       )
